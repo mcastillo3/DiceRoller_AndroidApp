@@ -3,7 +3,9 @@ package com.android.diceroller;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.view.ContextMenu;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -20,6 +22,7 @@ public class MainActivity extends AppCompatActivity
     public static final int MAX_DICE = 3;
 
     private int mVisibleDice;
+    private int mCurrentDie;
     private Dice[] mDice;
     private ImageView[] mDiceImageViews;
 
@@ -46,6 +49,40 @@ public class MainActivity extends AppCompatActivity
         mVisibleDice = MAX_DICE;
 
         showDice();
+
+        registerForContextMenu(mDiceImageViews[0]);
+
+        // Register context menus for all dice and tag each one
+        for (int i = 0; i < mDiceImageViews.length; i++) {
+            registerForContextMenu(mDiceImageViews[i]);
+            mDiceImageViews[i].setTag(i);
+        }
+    }
+
+    @Override
+    public void onCreateContextMenu (ContextMenu menu, View v,
+                                     ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        mCurrentDie = (int) v.getTag(); // Which die is selected
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.context_menu, menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected (MenuItem item) {
+        if (item.getItemId() == R.id.add_one) {
+            mDice[mCurrentDie].addOne();
+            showDice();
+            return true;
+        } else if (item.getItemId() == R.id.subtract_one) {
+            mDice[mCurrentDie].subtractOne();
+            showDice();
+            return true;
+        } else if (item.getItemId() == R.id.roll) {
+            rollDice();
+            return true;
+        }
+        return super.onContextItemSelected(item);
     }
 
     @Override
